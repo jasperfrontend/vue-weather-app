@@ -68,7 +68,8 @@ if ("geolocation" in navigator) {
   );
 } else {
   // Geolocation is not supported by the browser
-  console.error("Geolocation is not supported by this browser.");
+  // console.error("Geolocation is not supported by this browser.");
+  alert('Geolocation is not supported by your browser. Sorry for that!')
 }
 
 async function fetchCity(lat, lon, limit = 1) {
@@ -162,7 +163,7 @@ const currentHumidity = computed(() => {
 
 <style scoped>
 .weather-app {
-  width: 60em;
+  width: 50vw;
 }
 @media (max-width: 1024px) {
   .weather-app {
