@@ -3,8 +3,11 @@
     <div class="w-50">
       <v-text-field
         clearable
+        autofocus
         focused
         label="Enter your city"
+        hint="You can also append your country code like Rotterdam, US"
+        
         v-model="weatherCity"
       />
 
@@ -67,7 +70,7 @@ const fetchWeather = async () => {
 
     // Clear weather data if an error occurs
     weatherData.value = null; 
-    
+
   }
 };
 
