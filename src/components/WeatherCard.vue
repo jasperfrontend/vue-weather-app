@@ -4,7 +4,8 @@ const props = defineProps({
   subtitle: String,
   text: String,
   subtext: String,
-  avatar: String
+  avatar: String,
+  humidity: String,
 })
 
 </script>
@@ -14,10 +15,11 @@ const props = defineProps({
     :prepend-avatar="avatar"
     :title="title"
     :subtitle="subtitle"
+    :text="text"
   >
     <v-card-text>
       <v-chip variant="tonal" color="indigo-accent-1" label class="mr-3">
-        {{ text }}
+        {{ humidity }}
       </v-chip>
       <v-chip variant="tonal" color="indigo-accent-1" label class="mr-3">
         {{ subtext }}

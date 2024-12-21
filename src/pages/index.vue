@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex justify-center align-center h-100 w-100">
-    <div class="w-75">
-      <v-text-field
+    <div class="weather-app">
+      <!-- <v-text-field
         clearable
         autofocus
         focused
@@ -9,20 +9,28 @@
         hint="You can also append your country code like Rotterdam, US"
         
         v-model="weatherCity"
-      />
+      /> -->
 
       <VuetifyAlert v-if="errorData" :alertData="errorData" />
 
-      <div v-if="weatherData">
+      <div v-if="weatherData" class="ma-2">
+        <!-- <pre>{{ weatherData }}</pre> -->        
         <WeatherCard 
           :avatar="weatherIcon"
-          :title="weatherData.name" 
+          :title="weatherCity" 
           :subtitle="temperatureString" 
-          :text="weatherDescriptionString"
+          :text="dailyWeatherSummary"
           :subtext="minMaxTempsString"
+          :humidity="currentHumidity"
         />
+        <v-btn v-if="weatherData" class="my-2" @click.prevent="fetchWeather2()">Refresh</v-btn>
       </div>
-      
+      <div v-else class="ma-2">
+        <v-skeleton-loader 
+          type="list-item-avatar-two-line, paragraph"
+        >
+        </v-skeleton-loader>
+      </div>
     </div>
   </div>
 </template>
@@ -30,7 +38,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import axios from 'axios';
-import debounce from 'lodash.debounce'; 
 import WeatherCard from '@/components/WeatherCard.vue';
 import VuetifyAlert from '@/components/VuetifyAlert.vue';
 
@@ -38,28 +45,73 @@ import VuetifyAlert from '@/components/VuetifyAlert.vue';
 const weatherData = ref(null);
 const weatherCity = ref('');
 const errorData = ref(null);
-const weatherDescriptionString = ref(null);
+const userLat = ref(null);
+const userLong = ref(null);
 
+// Get location from user
+// Check if geolocation is supported by the browser
+if ("geolocation" in navigator) {
+  // Prompt user for permission to access their location
+  navigator.geolocation.getCurrentPosition(
+    // Success callback function
+    (position) => {
+      // Get the user's latitude and longitude coordinates
+      userLat.value = position.coords.latitude;
+      userLong.value = position.coords.longitude;
+      fetchWeather2();
+    },
+    // Error callback function
+    (error) => {
+      // Handle errors, e.g. user denied location sharing permissions
+      console.error("Error getting user location:", error);
+    }
+  );
+} else {
+  // Geolocation is not supported by the browser
+  console.error("Geolocation is not supported by this browser.");
+}
 
-// Function to fetch weather data
-const fetchWeather = async () => {
+async function fetchCity(lat, lon, limit = 1) {
   try {
-    if (!weatherCity.value) return;
+    if (!userLat.value && !userLong.value) return;
     // we only need the API_KEY if the code above evals false
     const API_KEY = import.meta.env.VITE_OPENWEATHERAPI_KEY;
-    // call openweathermap api with entered city and api key
     const response = await axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?q=${weatherCity.value}&appid=${API_KEY}&units=metric`
+      `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=${limit}&appid=${API_KEY}`
     );
+    weatherCity.value = `${response.data[0].name}, ${response.data[0].country}`;
+    
+  } catch(error) {
+    // in case of error, fill errorData object which can be passed to component VuetifyAlert
+    errorData.value = {
+      closeable: true,
+      icon: "mdi-alert-circle",
+      title: "Error",
+      text: "Failed to fetch city data. Please check the lat/long data.",
+      type: "error", // https://vuetifyjs.com/en/api/v-alert/#props-type
+      variant: "outlined"
+    }
+  }
+}
+
+const fetchWeather2 = async () => {
+  try {
+    if (!userLat.value && !userLong.value) return;
+    // we only need the API_KEY if the code above evals false
+    const API_KEY = import.meta.env.VITE_OPENWEATHERAPI_KEY;
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/3.0/onecall?lat=${userLat.value}&lon=${userLong.value}&exclude=minutely,hourly,alerts&appid=${API_KEY}&units=metric`
+    );
+
     // shove response data into reactie weatherData.value
     weatherData.value = response.data;
+    // fetch city name with lat/long data
+    await fetchCity(userLat.value, userLong.value, 1);
+
     // Clear error data if reponse succeeded
     errorData.value = null; 
-    // Generate sentence from weather data
-    weatherDescriptionString.value = capitalizeFirstLetter(generateweatherDescriptionString(response.data.weather));
 
   } catch (error) {
-
     // in case of error, fill errorData object which can be passed to component VuetifyAlert
     errorData.value = {
       closeable: true,
@@ -68,59 +120,53 @@ const fetchWeather = async () => {
       text: "Failed to fetch weather data. Please check the city name.",
       type: "error", // https://vuetifyjs.com/en/api/v-alert/#props-type
       variant: "outlined"
-    };
-
-    // Clear weather data if an error occurs
-    weatherData.value = null; 
-
+    }
   }
-};
+}
+
 
 // Computed temperate and 'feels like' string
 const temperatureString = computed(() => {
   return weatherData.value
-    ? `${weatherData.value.main.temp.toFixed(1)}°C (Feels ${weatherData.value.main.feels_like.toFixed(1)}°C man)`
+    ? `${weatherData.value.current.temp.toFixed(1)}°C (Feels like ${weatherData.value.current.feels_like.toFixed(1)}°C)`
     : '';
 });
 
 // Computed min/max temperature string
 const minMaxTempsString = computed(() => {
-  return weatherData.value ? `Min / max temp: ${weatherData.value.main.temp_min.toFixed(1)} / ${weatherData.value.main.temp_max.toFixed(1)}°C` : '';
+  return weatherData.value ? `Min / max temp: ${weatherData.value.daily[0].temp.min.toFixed(1)} / ${weatherData.value.daily[0].temp.max.toFixed(1)}°C` : '';
 })
 
 // Computed icon to represent the weather[0] status
 const weatherIcon = computed(() => {
-  return weatherData.value ? `https://openweathermap.org/img/wn/${weatherData.value.weather[0].icon}@2x.png` : '';
+  return weatherData.value ? `https://openweathermap.org/img/wn/${weatherData.value.current.weather[0].icon}@2x.png` : '';
 })
 
-// Generate a nice string of text from the weather statuses
-const generateweatherDescriptionString = (weatherArray) => {
-  if (!weatherArray || weatherArray.length === 0) return '';
+// Computed string daily weather summary
+const dailyWeatherSummary = computed(() => {
+  return weatherData.value
+  ? `${weatherData.value.daily[0].summary}.`
+  : '';
+})
 
-  // Combine `main` and `description` for each weather item
-  const descriptions = weatherArray.map((weather) => {
-    return `${weather.description.toLowerCase()}`;
-  });
+// Computed string current humidity
+const currentHumidity = computed(() => {
+  return weatherData.value
+  ? `${weatherData.value.current.humidity}% humidity`
+  : '';
+})
 
-  // Join descriptions with "with"
-  return descriptions.length === 1
-    ? descriptions[0] // Single weather condition
-    : descriptions.join(' with '); // Multiple conditions
-};
 
-// Function to capitalise the first letter of a string
-const capitalizeFirstLetter = (sentence) => {
-  return sentence.charAt(0).toUpperCase() + sentence.slice(1);
-};
-
-// Debounce the input for 800ms to reduce API calls to the openweather api
-const debouncedFetchWeather = debounce(fetchWeather, 800);
-
-watch(
-  weatherCity,
-  () => {
-    debouncedFetchWeather();
-  }
-);
 
 </script>
+
+<style scoped>
+.weather-app {
+  width: 60em;
+}
+@media (max-width: 1024px) {
+  .weather-app {
+    width: 95vh;
+  }
+}
+</style>
