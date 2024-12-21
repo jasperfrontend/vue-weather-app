@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex justify-center align-center h-100 w-100">
-    <div class="w-50">
+    <div class="w-75">
       <v-text-field
         clearable
         autofocus
@@ -12,6 +12,7 @@
       />
 
       <VuetifyAlert v-if="errorData" :alertData="errorData" />
+
       <div v-if="weatherData">
         <WeatherCard 
           :avatar="weatherIcon"
@@ -21,6 +22,7 @@
           :subtext="minMaxTempsString"
         />
       </div>
+      
     </div>
   </div>
 </template>
