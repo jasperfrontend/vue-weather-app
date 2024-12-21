@@ -63,14 +63,20 @@ if ("geolocation" in navigator) {
     // Error callback function
     (error) => {
       // Handle errors, e.g. user denied location sharing permissions
-      console.error("Error getting user location:", error);
+      console.error("Error getting user location:", error.message);
+      alert(error.message)
     }
   );
 } else {
   // Geolocation is not supported by the browser
   // console.error("Geolocation is not supported by this browser.");
-  alert('Geolocation is not supported by your browser. Sorry for that!')
+  alert('Geolocation is not supported by your browser. Sorry for that!');
 }
+
+
+const naviPerms = navigator.permissions.query({ name: 'geolocation' })
+  console.log(naviPerms);
+
 
 async function fetchCity(lat, lon, limit = 1) {
   try {
