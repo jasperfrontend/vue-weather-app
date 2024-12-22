@@ -23,13 +23,13 @@
           :subtext="minMaxTempsString"
           :humidity="currentHumidity"
         />
-        <v-btn class="my-2" @click.prevent="fetchWeather2(userLat, userLong)">Refresh</v-btn> <v-btn to="/w">Go to W</v-btn>
+        <v-btn class="my-2" @click.prevent="fetchWeather2(userLat, userLong)">Refresh</v-btn>
       </div>
 
       <!-- Loading Skeleton -->
-      <div v-else>
+      <!-- <div v-else>
         <v-skeleton-loader type="list-item-avatar-two-line, paragraph" />
-      </div>
+      </div> -->
 
     </div>
   </div>
