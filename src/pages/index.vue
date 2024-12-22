@@ -53,14 +53,13 @@ if ("geolocation" in navigator) {
       fetchWeather2(userLat.value, userLong.value);
     },
     (error) => {
-      // console.error("Geolocation error:", error.message);
       errorGeo.value = true; // Show text input for city
       errorData.value = {
         closeable: true,
         icon: "mdi-alert-circle",
         title: "Manual input required",
         text: `${error.message}`,
-        type: "info", // https://vuetifyjs.com/en/api/v-alert/#props-type
+        type: "info",
         variant: "outlined"
       }
     }
@@ -87,7 +86,7 @@ async function fetchCity(lat, lon, limit = 1) {
       icon: "mdi-alert-circle",
       title: "Error",
       text: "Failed to fetch city data. Please check the lat/long data.",
-      type: "error", // https://vuetifyjs.com/en/api/v-alert/#props-type
+      type: "error",
       variant: "outlined"
     }
   }

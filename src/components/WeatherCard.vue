@@ -18,10 +18,10 @@ const props = defineProps({
     :text="text"
   >
     <v-card-text>
-      <v-chip variant="tonal" color="indigo-accent-1" label class="mr-3">
+      <v-chip variant="tonal" color="indigo-accent-1" label class="mb-1 mr-3">
         {{ humidity }}
       </v-chip>
-      <v-chip variant="tonal" color="indigo-accent-1" label class="mr-3">
+      <v-chip variant="tonal" color="indigo-accent-1" label class="mb-1 mr-3">
         {{ subtext }}
       </v-chip>
     </v-card-text>
