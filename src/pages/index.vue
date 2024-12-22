@@ -21,7 +21,12 @@
         :subtext="minMaxTempsString"
         :humidity="currentHumidity"
       />
-      <v-btn class="my-2" @click.prevent="fetchWeather2(userLat, userLong)">Refresh</v-btn>
+      <v-btn
+        v-if="weatherData || manualWeatherCity && !errorGeo"
+        class="my-2" @click="fetchWeather2(userLat, userLong)"
+      >Refresh</v-btn>
+
+      <v-btn v-if="weatherData" class="ml-2" @click="errorGeo = !errorGeo">Toggle Manual input</v-btn>
 
     </div>
   </div>
