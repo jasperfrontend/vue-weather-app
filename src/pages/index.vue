@@ -10,26 +10,18 @@
         v-model="manualWeatherCity"
       />
 
-      <!-- Alert for errors -->
       <VuetifyAlert v-if="errorData" :alertData="errorData" />
 
-      <!-- Weather Data Display -->
-      <div v-if="weatherData || manualWeatherCity && !errorGeo">
-        <WeatherCard 
-          :avatar="weatherIcon"
-          :title="weatherCity" 
-          :subtitle="temperatureString" 
-          :text="dailyWeatherSummary"
-          :subtext="minMaxTempsString"
-          :humidity="currentHumidity"
-        />
-        <v-btn class="my-2" @click.prevent="fetchWeather2(userLat, userLong)">Refresh</v-btn>
-      </div>
-
-      <!-- Loading Skeleton -->
-      <!-- <div v-else>
-        <v-skeleton-loader type="list-item-avatar-two-line, paragraph" />
-      </div> -->
+      <WeatherCard 
+        v-if="weatherData || manualWeatherCity && !errorGeo"
+        :avatar="weatherIcon"
+        :title="weatherCity" 
+        :subtitle="temperatureString" 
+        :text="dailyWeatherSummary"
+        :subtext="minMaxTempsString"
+        :humidity="currentHumidity"
+      />
+      <v-btn class="my-2" @click.prevent="fetchWeather2(userLat, userLong)">Refresh</v-btn>
 
     </div>
   </div>
