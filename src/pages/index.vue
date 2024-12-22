@@ -20,14 +20,24 @@
         :text="dailyWeatherSummary"
         :subtext="minMaxTempsString"
         :humidity="currentHumidity"
+        :weatherIcon="weatherIcon"
       />
       <v-btn
         v-if="weatherData || manualWeatherCity && !errorGeo"
-        class="my-2" @click="fetchWeather2(userLat, userLong)"
-      >Refresh</v-btn>
-
-      <v-btn v-if="weatherData" class="ml-2" @click="errorGeo = !errorGeo">Toggle Manual input</v-btn>
-
+        class="my-2" 
+        @click="fetchWeather2(userLat, userLong)"
+      >
+      Refresh
+      </v-btn>
+      
+      <v-btn 
+        v-if="weatherData" 
+        class="ml-2" 
+        @click="errorGeo = !errorGeo"
+      >
+        Toggle Manual input
+      </v-btn>
+      
     </div>
   </div>
 </template>
@@ -38,6 +48,7 @@ import debounce from 'lodash.debounce';
 import axios from 'axios';
 import WeatherCard from '@/components/WeatherCard.vue';
 import VuetifyAlert from '@/components/VuetifyAlert.vue';
+import returnIcon from '@/utils/iconLib';
 
 // Reactive state
 const weatherData = ref(null);
@@ -189,7 +200,7 @@ const minMaxTempsString = computed(() => {
 
 const weatherIcon = computed(() => {
   return weatherData.value
-    ? `https://openweathermap.org/img/wn/${weatherData.value.current.weather[0].icon}@2x.png`
+    ? returnIcon(weatherData.value.current.weather[0].icon)
     : '';
 });
 
