@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-center align-center h-100 w-100">
+  <div class="d-flex justify-center align-center pa-3">
     <div class="weather-app">
       <!-- City Input Field -->
       <v-text-field
