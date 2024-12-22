@@ -14,7 +14,7 @@
       <VuetifyAlert v-if="errorData" :alertData="errorData" />
 
       <!-- Weather Data Display -->
-      <div v-if="weatherData">
+      <div v-if="weatherData || manualWeatherCity && !errorGeo">
         <WeatherCard 
           :avatar="weatherIcon"
           :title="weatherCity" 
@@ -23,7 +23,7 @@
           :subtext="minMaxTempsString"
           :humidity="currentHumidity"
         />
-        <v-btn class="my-2" @click.prevent="fetchWeather2">Refresh</v-btn>
+        <v-btn class="my-2" @click.prevent="fetchWeather2(userLat, userLong)">Refresh</v-btn> <v-btn to="/w">Go to W</v-btn>
       </div>
 
       <!-- Loading Skeleton -->
@@ -58,11 +58,19 @@ if ("geolocation" in navigator) {
     (position) => {
       userLat.value = position.coords.latitude;
       userLong.value = position.coords.longitude;
-      fetchWeather2();
+      fetchWeather2(userLat.value, userLong.value);
     },
     (error) => {
-      console.error("Geolocation error:", error.message);
+      // console.error("Geolocation error:", error.message);
       errorGeo.value = true; // Show text input for city
+      errorData.value = {
+        closeable: true,
+        icon: "mdi-alert-circle",
+        title: "Manual input required",
+        text: `${error.message}`,
+        type: "info", // https://vuetifyjs.com/en/api/v-alert/#props-type
+        variant: "outlined"
+      }
     }
   );
 } else {
@@ -102,10 +110,22 @@ const fetchLatLon = async (city) => {
       `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`
     );
     const location = response.data[0];
-    userLat.value = location.lat;
-    userLong.value = location.lon;
-    weatherCity.value = `${location.name}, ${location.country}`;
-    fetchWeather2();
+    if(location) {
+      userLat.value = location.lat;
+      userLong.value = location.lon;
+      weatherCity.value = `${location.name}, ${location.country}`;
+      
+      await fetchWeather2(userLat.value, userLong.value);
+    } else {
+      errorData.value = {
+        closeable: true,
+        icon: "mdi-alert-circle",
+        title: "Error",
+        text: "Failed to fetch location data. Please check the city name.",
+        type: "error",
+        variant: "outlined"
+      };
+    }
   } catch (error) {
     console.error("Error fetching lat/lon:", error);
     errorData.value = {
@@ -119,13 +139,14 @@ const fetchLatLon = async (city) => {
   }
 };
 
-const fetchWeather2 = async () => {
+const fetchWeather2 = async (lat, lon) => {
   try {
-    if (!userLat.value || !userLong.value) return;
+    if (!lat && !lon) return;
     const API_KEY = import.meta.env.VITE_OPENWEATHERAPI_KEY;
     const response = await axios.get(
-      `https://api.openweathermap.org/data/3.0/onecall?lat=${userLat.value}&lon=${userLong.value}&exclude=minutely,hourly,alerts&appid=${API_KEY}&units=metric`
+      `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&appid=${API_KEY}&units=metric`
     );
+
     weatherData.value = response.data;
 
     // fetch city name with lat/long data
@@ -138,7 +159,7 @@ const fetchWeather2 = async () => {
       closeable: true,
       icon: "mdi-alert-circle",
       title: "Error",
-      text: "Failed to fetch weather data.",
+      text: `Failed to fetch weather data: ${error}`,
       type: "error",
       variant: "outlined"
     };
