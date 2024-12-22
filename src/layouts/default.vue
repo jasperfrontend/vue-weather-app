@@ -6,6 +6,8 @@
         <a href="https://vuejs.org" target="_blank">Vue.js</a>, 
         <a href="https://vuetifyjs.com/" target="_blank">Vuetify</a> and the 
         <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap API</a>
+        |
+        <a href="https://github.com/jasperfrontend/vue-weather-app" target="_blank">GitHub</a>
       </p>
     </v-main>
   </v-app>

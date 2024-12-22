@@ -10,34 +10,37 @@
         v-model="manualWeatherCity"
       />
 
-      <VuetifyAlert v-if="errorData" :alertData="errorData" />
+      <VuetifyAlert v-if="errorData" :alertData="errorData" class="mb-3" />
 
-      <WeatherCard 
-        v-if="weatherData || manualWeatherCity && !errorGeo"
-        :avatar="weatherIcon"
-        :title="weatherCity" 
-        :subtitle="temperatureString" 
-        :text="dailyWeatherSummary"
-        :subtext="minMaxTempsString"
-        :humidity="currentHumidity"
-        :weatherIcon="weatherIcon"
-      />
-      <v-btn
-        v-if="weatherData || manualWeatherCity && !errorGeo"
-        class="my-2" 
-        @click="fetchWeather2(userLat, userLong)"
-      >
-      Refresh
-      </v-btn>
-      
-      <v-btn 
-        v-if="weatherData" 
-        class="ml-2" 
-        @click="errorGeo = !errorGeo"
-      >
-        Toggle Manual input
-      </v-btn>
-      
+      <div v-if="weatherData">
+
+        <WeatherCard 
+          v-if="weatherData || manualWeatherCity && !errorGeo"
+          :avatar="weatherIcon"
+          :title="weatherCity" 
+          :subtitle="temperatureString" 
+          :text="dailyWeatherSummary"
+          :subtext="minMaxTempsString"
+          :humidity="currentHumidity"
+          :weatherIcon="weatherIcon"
+        />
+        <v-btn
+          v-if="weatherData || manualWeatherCity && !errorGeo"
+          class="my-2" 
+          @click="weatherData = null; sleep(1000).then(() => { fetchWeather2(userLat, userLong) });"
+        >
+        Refresh
+        </v-btn>
+        
+        <v-btn 
+          v-if="weatherData" 
+          class="ml-2" 
+          @click="errorGeo = !errorGeo"
+        >
+          Toggle Manual input
+        </v-btn>
+      </div>
+      <v-skeleton-loader v-else type="list-item-avatar-two-line, text, chip, chip"></v-skeleton-loader>
     </div>
   </div>
 </template>
@@ -83,6 +86,10 @@ if ("geolocation" in navigator) {
 } else {
   console.error("Geolocation not supported.");
   errorGeo.value = true; // Show text input for city
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function fetchCity(lat, lon, limit = 1) {
