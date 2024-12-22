@@ -107,7 +107,7 @@ const fetchLatLon = async (city) => {
     if (!city) return;
     const API_KEY = import.meta.env.VITE_OPENWEATHERAPI_KEY;
     const response = await axios.get(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`
+      `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`
     );
     const location = response.data[0];
     if(location) {
